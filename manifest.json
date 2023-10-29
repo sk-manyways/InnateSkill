@@ -1,0 +1,11 @@
+{
+    "name": "InnateSkill",
+    "version_number": "1.0.1",
+    "website_url": "https://github.com/sk-manyways/InnateSkill",
+    "description": "A large skill selection for the first pick. Not compatible with PickNCards.",
+    "dependencies": [
+        "willis81808-UnboundLib-3.1.1",
+        "BepInEx-BepInExPack_ROUNDS-5.4.1100"
+    ]
+}
+

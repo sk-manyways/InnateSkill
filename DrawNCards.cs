@@ -4,9 +4,11 @@ using Photon.Pun;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnboundLib; // requires UnboundLib.dll
 using UnboundLib.Networking;
 using UnityEngine; // requires UnityEngine.dll, UnityEngine.CoreModule.dll, and UnityEngine.AssetBundleModule.dll
+using UnityEngine.UI;
 
 // requires Assembly-CSharp.dll
 // requires MMHOOK-Assembly-CSharp.dll
@@ -271,6 +273,7 @@ namespace DrawNCards
     //    }
     //}
 
+    // patch to make all cards visible during the innate skill pick phase
     [Serializable]
     [HarmonyPatch(typeof(CardVisuals), "Start")]
     class CardVisualsPatchStart
@@ -288,6 +291,37 @@ namespace DrawNCards
             if (InnateSkill.InnateSkill.IsInnateRoundInEffect())
             {
                 _cardVisualsInstance.ChangeSelected(true);
+            }
+        }
+    }
+
+    // patch to increase the brightness of non-selected cards
+    [Serializable]
+    [HarmonyPatch(typeof(CardVisuals), "ChangeSelected")]
+    class CardVisualsPatchChangeSelected
+    {
+        private static CardVisuals _cardVisualsInstance = null;
+
+        private static void Prefix(CardVisuals __instance)
+        {
+            _cardVisualsInstance = __instance;
+        }
+
+        [HarmonyPostfix]
+        private static void increaseBrightness()
+        {
+            if (InnateSkill.InnateSkill.IsInnateRoundInEffect())
+            {
+                CanvasGroup group = (CanvasGroup)_cardVisualsInstance.GetFieldValue("group");
+                group.alpha = 1f;
+
+                Image[] images = (Image[])_cardVisualsInstance.GetFieldValue("images");
+
+                for (int i = 0; i < images.Length; i++)
+                {
+                    images[i].color = _cardVisualsInstance.defaultColor;
+                }
+                _cardVisualsInstance.nameText.color = _cardVisualsInstance.defaultColor;
             }
         }
     }

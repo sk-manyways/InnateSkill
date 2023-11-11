@@ -30,7 +30,7 @@ namespace DrawNCards
         public static ConfigEntry<int> NumDrawsConfig;
         internal static int numPerRow = 10;
         internal static int ifEnabledNumDraws = 40;
-        internal static int defaultNumDraws = 5;
+        internal static int defaultNumDraws = 7;
 
         private const float arc_A = 0.2102040816f;
         private const float arc_B = 1.959183674f;

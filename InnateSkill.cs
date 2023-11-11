@@ -217,6 +217,31 @@ namespace InnateSkill
             }
         }
 
+
+        // patch to reset the first round indicator when the game starts
+        [Serializable]
+        [HarmonyPatch(typeof(GM_ArmsRace), "StartGame")]
+        class GM_ArmsRacePatchStartGame
+        {
+            [HarmonyPostfix]
+            private static void resetFirstRound()
+            {
+                InnateSkill.firstRound = true;
+            }
+        }
+
+        // patch to reset the first round indicator when the game restarts
+        [Serializable]
+        [HarmonyPatch(typeof(GM_ArmsRace), "GameOverRematch")]
+        class GM_ArmsRacePatchGameOverRematch
+        {
+            [HarmonyPostfix]
+            private static void resetFirstRound()
+            {
+                InnateSkill.firstRound = true;
+            }
+        }
+
         // patch to change draw rate
         [HarmonyPatch]
         class CardChoicePatchReplaceCards

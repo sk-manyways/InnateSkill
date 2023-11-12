@@ -57,6 +57,8 @@ namespace InnateSkill
             EnabledConfig = Config.Bind(CompatibilityModName, "Enabled", true, "Allow an innate skill pick.");
             InnateSkill.modEnabled = InnateSkill.EnabledConfig.Value;
 
+            DrawNCards.DrawNCards.NumDrawsConfig = Config.Bind(CompatibilityModName, "Draws", 7, "Number of cards drawn from the deck to choose from");
+
             // apply patches
             new Harmony(ModId).PatchAll();
         }
@@ -74,18 +76,22 @@ namespace InnateSkill
             // hooks for picking N cards
             GameModeManager.AddHook(GameModeHooks.HookPickStart, (gm) => InnateSkill.ResetPickQueue(), GameModeHooks.Priority.First);
             GameModeManager.AddHook(GameModeHooks.HookPickEnd, InnateSkill.ExtraPicks, GameModeHooks.Priority.First);
+
+            // read settings to not orphan them
+            DrawNCards.DrawNCards.defaultNumDraws = DrawNCards.DrawNCards.NumDrawsConfig.Value;
         }
         private void OnHandShakeCompleted()
         {
             if (PhotonNetwork.IsMasterClient)
             {
-                NetworkingManager.RPC_Others(typeof(InnateSkill), nameof(SyncSettings), new object[] { InnateSkill.modEnabled });
+                NetworkingManager.RPC_Others(typeof(InnateSkill), nameof(SyncSettings), new object[] { InnateSkill.modEnabled, DrawNCards.DrawNCards.defaultNumDraws });
             }
         }
         [UnboundRPC]
-        private static void SyncSettings(bool host_enabled)
+        private static void SyncSettings(bool host_enabled, int host_draws)
         {
             InnateSkill.modEnabled = host_enabled;
+            DrawNCards.DrawNCards.defaultNumDraws = host_draws;
         }
         private void NewGUI(GameObject menu)
         {
@@ -99,6 +105,15 @@ namespace InnateSkill
                 OnHandShakeCompleted();
             }
             MenuHandler.CreateToggle(EnabledConfig.Value, "Innate Skill Pick Enabled", menu, EnabledChanged);
+
+            MenuHandler.CreateText(" ", menu, out TextMeshProUGUI _, 30);
+            void DrawsChanged(float val)
+            {
+                DrawNCards.DrawNCards.NumDrawsConfig.Value = UnityEngine.Mathf.RoundToInt(UnityEngine.Mathf.Clamp(val, 1f, (float)DrawNCards.DrawNCards.maxDraws));
+                DrawNCards.DrawNCards.defaultNumDraws = DrawNCards.DrawNCards.NumDrawsConfig.Value;
+                OnHandShakeCompleted();
+            }
+            MenuHandler.CreateSlider("Number of cards to draw", menu, 30, 1f, (float)DrawNCards.DrawNCards.maxDraws, DrawNCards.DrawNCards.NumDrawsConfig.Value, DrawsChanged, out UnityEngine.UI.Slider _, true);
         }
         [UnboundRPC]
         public static void RPC_RequestSync(int requestingPlayer)

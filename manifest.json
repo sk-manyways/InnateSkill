@@ -1,6 +1,6 @@
 {
     "name": "InnateSkill",
-    "version_number": "1.0.5",
+    "version_number": "1.0.6",
     "website_url": "https://github.com/sk-manyways/InnateSkill",
     "description": "A large skill selection for the first pick. Not compatible with PickNCards.",
     "dependencies": [

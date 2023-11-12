@@ -59,6 +59,11 @@ namespace DrawNCards
             }
         }
 
+        internal static bool IsInnateSkillLayoutEnabled()
+        {
+            return InnateSkill.InnateSkill.IsInnateRoundInEffect() || defaultNumDraws == 40;
+        }
+
         internal static List<Vector3> GetInnateSkillPositions(int N, float offset = 0f)
         {
             int numRows = ifEnabledNumDraws / numPerRow;
@@ -92,7 +97,7 @@ namespace DrawNCards
         {
             // everything is in SCREEN UNITS
 
-            if (InnateSkill.InnateSkill.IsInnateRoundInEffect())
+            if (IsInnateSkillLayoutEnabled())
             {
                 return GetInnateSkillPositions(N, offset);
             }
@@ -231,49 +236,7 @@ namespace DrawNCards
 
     }
 
-
-    //// patch to sort cards by name
-    //[Serializable]
-    //[HarmonyPatch(typeof(CardChoice), "ReplaceCards")]
-    //class CardChoicePatcReplaceCards
-    //{
-    //    private static CardChoice _cardChoiceInstance = null;
-
-    //    private static void Prefix(CardChoice __instance)
-    //    {
-    //        UnityEngine.Debug.Log($"Own Instantiated cardChoiceInstance: [{__instance}]");
-    //        _cardChoiceInstance = __instance;
-    //    }
-
-    //    private static void SortCards()
-    //    {
-    //        // sort cards by name
-    //        UnityEngine.Debug.Log($"Own about to start sorting cards...");
-    //        List<GameObject> sc = (List<GameObject>)_cardChoiceInstance.GetFieldValue("spawnedCards");
-    //        UnityEngine.Debug.Log($"Own about to sort cards, len: [{sc.Count}]");
-    //        sc = sc.OrderBy(go => go.GetComponent<CardInfo>().cardName).ToList();
-    //        UnityEngine.Debug.Log($"Own 1");
-    //        if (sc.Count == 39)
-    //        {
-    //            UnityEngine.Debug.Log($"Own 3");
-    //            _cardChoiceInstance.SetFieldValue("spawnedCards", sc);
-    //        }
-    //        UnityEngine.Debug.Log($"Own 2");
-    //    }
-
-    //    private static void Postfix(ref IEnumerator __result)
-    //    {
-    //        new Thread(() =>
-    //        {
-    //            Thread.Sleep(1000);
-    //            SortCards();
-    //        }).Start();
-
-    //        //NetworkingManager.RPC_Others(typeof(CardChoicePatchSpawn), nameof(RPCO_AddRemotelySpawnedCard), new object[] { __result.GetComponent<PhotonView>().ViewID });
-    //    }
-    //}
-
-    // patch to make all cards visible during the innate skill pick phase
+    // patch to make all cards face-up during the innate skill pick phase
     [Serializable]
     [HarmonyPatch(typeof(CardVisuals), "Start")]
     class CardVisualsPatchStart
@@ -288,7 +251,7 @@ namespace DrawNCards
         [HarmonyPostfix]
         private static void markCardAsShowing()
         {
-            if (InnateSkill.InnateSkill.IsInnateRoundInEffect())
+            if (DrawNCards.IsInnateSkillLayoutEnabled())
             {
                 _cardVisualsInstance.ChangeSelected(true);
             }
@@ -310,7 +273,7 @@ namespace DrawNCards
         [HarmonyPostfix]
         private static void increaseBrightness()
         {
-            if (InnateSkill.InnateSkill.IsInnateRoundInEffect())
+            if (DrawNCards.IsInnateSkillLayoutEnabled())
             {
                 CanvasGroup group = (CanvasGroup)_cardVisualsInstance.GetFieldValue("group");
                 group.alpha = 1f;
